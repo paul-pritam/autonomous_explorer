@@ -1,0 +1,31 @@
+<root main_tree_to_execute="BehaviorTree">
+    <BehaviorTree ID="BehaviorTree">
+        <Control ID="RecoveryNode" number_of_retries="3" name="NavigateRecovery">
+            
+           
+            <Control ID="PipelineSequence" name="NavigateWithReplanning">
+                <Decorator ID="RateController" hz="1.0">
+                    <Action ID="ComputePathToPose" goal="{goal}" path="{path}" planner_id="GridBased" server_name="compute_path_to_pose"/>
+                </Decorator>
+                <Action ID="FollowPath" controller_id="FollowPath" path="{path}" server_name="follow_path"/>
+            </Control>
+            
+           
+            <Sequence name="RecoveryActions">
+                <Action ID="Wait" wait_duration="2.0" server_name="wait"/>
+                
+                
+                <Action ID="ClearEntireCostmap" service_name="local_costmap/clear_entirely_local_costmap"/>
+                <Action ID="ClearEntireCostmap" service_name="global_costmap/clear_entirely_global_costmap"/>
+                
+                <ReactiveFallback name="SpinOrReplan">
+                    <Decorator ID="RateController" hz="1.0">
+                        <Action ID="ComputePathToPose" goal="{goal}" path="{path}" planner_id="GridBased" server_name="compute_path_to_pose"/>
+                    </Decorator>
+                    <Action ID="Spin" spin_dist="1.57" server_name="spin"/> 
+                </ReactiveFallback>
+            </Sequence>
+            
+        </Control>
+    </BehaviorTree>
+</root>
