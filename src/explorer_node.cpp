@@ -226,10 +226,7 @@ void ExplorerNode::process_map(const nav_msgs::msg::OccupancyGrid::SharedPtr msg
         potential_goal.x = f.centroid.x + PULL_BACK * std::cos(angle_to_robot);
         potential_goal.y = f.centroid.y + PULL_BACK * std::sin(angle_to_robot);
         potential_goal.z = 0.0;
-
-        // ==========================================
-        // FIX 1: Ensure goal is in FREE SPACE
-        // ==========================================
+        
         bool is_free_space = false;
         int gx = static_cast<int>((potential_goal.x - msg->info.origin.position.x) / msg->info.resolution);
         int gy = static_cast<int>((potential_goal.y - msg->info.origin.position.y) / msg->info.resolution);
@@ -301,9 +298,6 @@ void ExplorerNode::send_goal(geometry_msgs::msg::Point p, double yaw)
 
     auto ops = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
     
-    // ==========================================
-    // FIX 2: Handle Goal Rejection to stop freezing
-    // ==========================================
     ops.goal_response_callback = [this](const GoalHandleNav::SharedPtr & goal_handle) {
         if (!goal_handle) {
             RCLCPP_ERROR(this->get_logger(), "Goal was REJECTED by Nav2 Server! Blacklisting and unlocking.");
